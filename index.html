@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ForensIQ – Automated Digital Forensics and Cyber Incident Investigation</title>
+<style>
+:root{--bg:#f3f5f6;--card:#fff;--ink:#13191c;--mut:#5a666b;--line:#d9dfe2;--acc:#0b7285;--ok:#157a47;--warn:#a96a00;--bad:#c02a2a;--crit:#7a1fa2;--tint:#e8f3f5;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1214;--card:#151c1f;--ink:#e6eef0;--mut:#93a3a8;--line:#27343a;--acc:#4fc3d4;--ok:#46c28a;--warn:#e3b05a;--bad:#ff8080;--crit:#d89af2;--tint:#1a2a2e;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0d1214;--card:#151c1f;--ink:#e6eef0;--mut:#93a3a8;--line:#27343a;--acc:#4fc3d4;--ok:#46c28a;--warn:#e3b05a;--bad:#ff8080;--crit:#d89af2;--tint:#1a2a2e;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.55 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:1000px;margin:0 auto;padding:16px}
+h1{font-size:1.5rem;margin:.2em 0;letter-spacing:-.01em}h2{font-size:1.05rem;margin:0 0 .6em}
+.sub{color:var(--mut);margin:0}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0}
+nav button,.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 14px;border-radius:8px;font:inherit;cursor:pointer}
+nav button.on,.btn.p{background:var(--acc);color:var(--bg);border-color:var(--acc);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:700px){.g2{grid-template-columns:1fr}}
+textarea,input,select{width:100%;box-sizing:border-box;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px;font:inherit}
+textarea{font:12px/1.45 ui-monospace,Menlo,Consolas,monospace;height:200px}
+label{font-size:.82rem;color:var(--mut);display:block;margin:8px 0 3px}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:.85rem}
+th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}th{color:var(--mut);font-weight:600}
+tr.f td{background:var(--tint)}
+.pipe{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.82rem}
+.pipe span{background:var(--tint);border:1px solid var(--line);padding:3px 10px;border-radius:99px}
+.big{font-size:3rem;font-weight:700;line-height:1}.sum{display:flex;gap:16px;align-items:center}
+.Benign,.Low{color:var(--ok)}.Suspicious,.Medium{color:var(--warn)}.High{color:var(--bad)}.Critical{color:var(--crit)}
+.tag{display:inline-block;padding:1px 9px;border-radius:99px;border:1px solid currentColor;font-size:.78rem;font-weight:600}
+.row{display:flex;align-items:center;gap:8px;margin:5px 0;font-size:.85rem}
+.row i{width:200px;font-style:normal;flex:none}.row b{flex:none;width:28px}.row div{flex:1}
+.bar{height:10px;background:var(--acc);border-radius:5px}
+pre{white-space:pre-wrap;font:12px/1.5 ui-monospace,Menlo,Consolas,monospace;margin:0 0 10px}
+.mut{color:var(--mut);font-size:.82rem}
+.chain{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.ch{padding:4px 10px;border:1px dashed var(--line);border-radius:6px;font-size:.8rem;color:var(--mut)}.ch.on{border:1px solid var(--bad);color:var(--bad);font-weight:600}
+.hm{width:auto}.hm td{width:44px;height:30px;text-align:center;border:1px solid var(--line);background:color-mix(in srgb,currentColor 22%,transparent)}.hm th{text-align:center}
+.tabs{display:flex;gap:6px;margin:14px 0}
+</style></head><body>
+<div id="auth" class="w"><div class="card" style="max-width:420px;margin:8vh auto 0"><h1>ForensIQ</h1><p class="sub">Sign in to open the investigation workspace.</p><div class="tabs"><button class="btn p" id="tabin">Sign in</button><button class="btn" id="tabup">Create account</button></div><label for="un">Username</label><input id="un" autocomplete="username"><label for="pw">Password (8 characters or more)</label><input id="pw" type="password" autocomplete="current-password"><div id="pw2w" hidden><label for="pw2">Confirm password</label><input id="pw2" type="password" autocomplete="new-password"></div><p id="am" class="High" role="alert"></p><button class="btn p" id="ab" style="width:100%">Sign in</button><p class="mut">Demo login: accounts are saved only in this browser, and each account keeps its own history. Do not use a real password.</p></div></div>
+<div class="w" id="app" hidden>
+<h1>ForensIQ</h1>
+<p class="sub">Automated digital forensics and cyber incident investigation: a working model with simulated log evidence.</p>
+<div id="bar" class="mut" style="margin-top:6px"></div>
+<nav><button class="on" data-t="inv">Investigate</button><button data-t="tst">Test results</button><button data-t="dash">Dashboard</button><button data-t="aud">Audit and risk mapping</button><button data-t="adm" id="admb" hidden>Admin</button></nav>
+
+<section class="tab" id="inv">
+<div class="card"><div class="pipe"><span>Evidence</span>→<span>SHA-256 and chain of custody</span>→<span>Parse</span>→<span>Detect: rules and behaviour</span>→<span>ATT&amp;CK attack chain</span>→<span>Score and risk (L×I)</span>→<span>Response playbook</span>→<span>Report</span></div></div>
+<div class="card"><h2>1. Evidence intake</h2><div class="g2"><div>
+<label for="smp">Sample case</label><select id="smp"></select>
+<label for="file">Or load your own log file (.txt, .log)</label><input type="file" id="file" accept=".txt,.log,.csv">
+<label for="who">Investigator name</label><input id="who" value="Analyst 1">
+<label for="asset">Asset criticality (impact)</label><select id="asset"><option value="2">Low: test machine</option><option value="3" selected>Moderate: staff workstation</option><option value="5">Business-critical: server or sensitive data</option></select>
+</div><div><label for="log">Log evidence, one event per line: time | host | source IP | user | message</label><textarea id="log" spellcheck="false"></textarea></div></div>
+<p><button class="btn p" id="go">Run investigation</button> <button class="btn" id="ver">Verify integrity</button> <span id="vmsg" class="mut"></span></p></div>
+<div id="out"></div></section>
+
+<section class="tab" id="tst" hidden><div class="card"><h2>Evaluation on labelled scenarios</h2><p class="mut">Each scenario has a known answer. A score of 25 or more counts as “incident detected”.</p><button class="btn p" id="rt">Run all scenarios</button></div><div id="tout"></div></section>
+<section class="tab" id="dash" hidden><div id="dout"></div></section>
+<section class="tab" id="aud" hidden>
+<div class="card"><h2>How the model applies security risk management</h2><table>
+<tr><th>Stage</th><th>In ForensIQ</th></tr>
+<tr><td>Identify assets</td><td>Asset criticality sets the impact value for every investigation.</td></tr>
+<tr><td>Assess risk</td><td>Likelihood from the detection score, times impact, gives a rating from 1 to 25.</td></tr>
+<tr><td>Treat risk</td><td>Each triggered indicator maps to a recommended control and an ATT&amp;CK technique.</td></tr>
+<tr><td>Monitor and review</td><td>The dashboard tracks incidents, severity and the most frequent techniques.</td></tr>
+<tr><td>Evidence integrity</td><td>SHA-256 hashing and a hash-chained custody log make tampering detectable.</td></tr></table></div>
+<div class="card"><h2>Self-audit: known limitations</h2><div class="tw"><table>
+<tr><th>ID</th><th>Rating</th><th>Limitation</th><th>Planned fix</th></tr>
+<tr><td>A-01</td><td class="Medium">Medium</td><td>Rules plus two simple behavioural checks, with no trained model; novel attacks can be missed.</td><td>Train an anomaly model (for example an isolation forest) on baseline logs.</td></tr>
+<tr><td>A-02</td><td class="Medium">Medium</td><td>Reads text logs (ISO-timestamp and Linux syslog formats), not EVTX, pcap or disk images.</td><td>Add parsers such as Plaso, Volatility and Zeek.</td></tr>
+<tr><td>A-03</td><td class="Medium">Medium</td><td>Custody log lives in the browser; it is not signed or write-once.</td><td>Use an append-only store, digital signatures and trusted timestamps.</td></tr>
+<tr><td>A-04</td><td class="Medium">Medium</td><td>Only seven scripted scenarios, so accuracy figures are indicative.</td><td>Evaluate on a labelled public dataset and report precision and recall.</td></tr>
+<tr><td>A-05</td><td class="Low">Low</td><td>Threat-intelligence list is static.</td><td>Consume live STIX/TAXII feeds.</td></tr>
+<tr><td>A-06</td><td class="Low">Low</td><td>Indicator weights are expert-set, not calibrated.</td><td>Calibrate weights against labelled incidents.</td></tr>
+<tr><td>A-07</td><td class="High">High</td><td>The login is a browser-only demo: accounts and page code sit on the user’s device, so it cannot protect data from that user.</td><td>Move authentication to a server with hashed passwords, sessions, rate limiting and MFA.</td></tr>
+<tr><td>A-08</td><td class="Medium">Medium</td><td>Admin controls and the activity log are stored in the browser and can be edited by the person using it.</td><td>Keep roles and an append-only audit log on a server, with signed entries.</td></tr></table></div></div></section>
+<section class="tab" id="adm" hidden><div id="aout"></div></section>
+<p class="mut">Academic prototype using simulated evidence. Not a replacement for certified forensic tools.</p></div>
+
+<script>
+const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const INTEL=["198.51.100.23","secure-update-portal.xyz"];
+const F=/failed password|login failed|authentication failure|4625/i,S=/accepted (password|publickey)|login succeeded|4624/i;
+const rx=re=>ev=>ev.filter(e=>re.test(e.msg));
+const RULES=[
+{id:"R1",name:"Repeated failed logins from one source (5 or more)",cat:"Account takeover",pts:25,tech:"T1110",fix:"Enforce account lockout and MFA; rate-limit or block the source IP.",find:ev=>{const g={};ev.filter(e=>F.test(e.msg)).forEach(e=>(g[e.ip]=g[e.ip]||[]).push(e));return Object.values(g).filter(a=>a.length>=5).flat()}},
+{id:"R2",name:"Successful login after a failure burst",cat:"Account takeover",pts:30,tech:"T1078",fix:"Reset the credentials, revoke active sessions and review the account’s recent activity.",find:ev=>{const g={},o=[];ev.forEach(e=>{if(F.test(e.msg))g[e.ip]=(g[e.ip]||0)+1;else if(S.test(e.msg)&&(g[e.ip]||0)>=5)o.push(e)});return o}},
+{id:"R3",name:"Privilege escalation or admin group change",cat:"Account takeover",pts:20,tech:"T1548",fix:"Apply least privilege; alert on admin-group changes and require approval.",find:rx(/added to group (administrators|admins|sudo|root)|4728|4732|privilege escalation|sudo su\s*-/i)},
+{id:"R4",name:"Suspicious or encoded command execution",cat:"Malware or ransomware",pts:25,tech:"T1059.001",fix:"Turn on script-block logging and application allow-listing; isolate the endpoint.",find:rx(/powershell(\.exe)?\s+(-enc|-encodedcommand)|mimikatz|certutil\s+-urlcache|whoami \/priv/i)},
+{id:"R5",name:"Persistence mechanism created",cat:"Malware or ransomware",pts:15,tech:"T1053.005",fix:"Audit scheduled tasks, services and Run keys; remove unauthorised entries.",find:rx(/schtasks\s+\/create|crontab -e|CurrentVersion\\Run|new service installed/i)},
+{id:"R6",name:"Log clearing or defence evasion",cat:"Defence evasion",pts:20,tech:"T1070.001",fix:"Forward logs to a central write-once SIEM so local clearing cannot hide activity.",find:rx(/wevtutil\s+cl|log (was )?cleared|audit log cleared|auditd stopped|disabled (defender|antivirus)/i)},
+{id:"R7",name:"Ransomware behaviour (shadow copies deleted, files encrypted)",cat:"Malware or ransomware",pts:35,tech:"T1486",fix:"Isolate hosts, restore from offline backups and protect backup systems.",find:rx(/vssadmin\s+delete\s+shadows|\.locked\b|\.encrypted\b|README_DECRYPT|recoveryenabled no/i)},
+{id:"R8",name:"Large outbound transfer to an external destination",cat:"Data exfiltration",pts:25,tech:"T1041",fix:"Apply egress filtering and DLP; block the destination and establish what data left.",find:ev=>ev.filter(e=>/outbound|upload|exfil|scp|ftp/i.test(e.msg)&&(+((e.msg.match(/(\d+)\s?MB/i)||[])[1])||0)>=100&&!/\.internal|\b10\.\d+\.\d+\.\d+|192\.168\./i.test(e.msg))},
+{id:"R9",name:"Known-bad IP or domain (threat-intel match)",cat:"Command and control",pts:15,tech:"T1071",fix:"Block the indicator at firewall and DNS, then hunt for other hosts contacting it.",find:ev=>ev.filter(e=>INTEL.some(x=>e.raw.includes(x)))},
+{id:"R10",name:"Lateral movement tooling (PsExec, remote WMI)",cat:"Lateral movement",pts:20,tech:"T1021.002",fix:"Segment the network and restrict admin shares and remote service creation.",find:rx(/psexec|wmic\s+\/node|admin\$ share|remote service creation/i)},
+{id:"A1",name:"Off-hours activity by an interactive account (behavioural)",cat:"Anomalous behaviour",pts:10,tech:"Anomaly",fix:"Confirm the activity with the account owner and alert on interactive logins between 00:00 and 06:00.",find:ev=>ev.filter(e=>{const h=+((e.ts.match(/[ T](\d\d):/)||[])[1]);return h<6&&e.user!=="-"&&!/^(svc-|ops$|root$)/.test(e.user)})},
+{id:"A2",name:"Successful login from an external IP (behavioural)",cat:"Account takeover",pts:10,tech:"T1133",fix:"Restrict remote access to a VPN or allow-listed IP ranges.",find:ev=>ev.filter(e=>S.test(e.msg)&&e.ip!=="-"&&!PRIV.test(e.ip))}];
+const TAC={R1:"Credential Access",R2:"Initial Access",R3:"Privilege Escalation",R4:"Execution",R5:"Persistence",R6:"Defense Evasion",R7:"Impact",R8:"Exfiltration",R9:"Command and Control",R10:"Lateral Movement",A1:"Anomaly",A2:"Initial Access"};
+const ORDER=["Initial Access","Execution","Persistence","Privilege Escalation","Defense Evasion","Credential Access","Lateral Movement","Command and Control","Exfiltration","Impact"];
+const PRIV=/^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/;
+const sev=p=>p>=30?"High":p>=20?"Medium":"Low";
+const fl=n=>Array.from({length:n},(_,i)=>"2026-11-18 02:14:0"+i+" | WEB01 | 203.0.113.45 | admin | Failed password for admin").join("\n");
+const sy=n=>Array.from({length:n},(_,i)=>"Nov 18 03:12:"+String(i*2).padStart(2,"0")+" web01 sshd[812]: Failed password for deploy from 198.51.100.77 port "+(52100+i)+" ssh2").join("\n");
+const SC=[
+{name:"Brute force leading to account takeover",mal:1,log:fl(6)+"\n2026-11-18 02:14:20 | WEB01 | 203.0.113.45 | admin | Accepted password for admin\n2026-11-18 02:16:42 | WEB01 | 10.0.0.12 | admin | User admin added to group Administrators\n2026-11-18 02:21:05 | WEB01 | 10.0.0.12 | admin | wevtutil cl Security (audit log cleared)"},
+{name:"Ransomware outbreak on a workstation",mal:1,log:["2026-11-18 09:02:11 | HR-PC07 | 10.0.4.17 | priya | Process started: powershell.exe -enc SQBFAFgAIAAoAE4AZQB3AC0A","2026-11-18 09:02:40 | HR-PC07 | 10.0.4.17 | priya | cmd.exe /c vssadmin delete shadows /all /quiet","2026-11-18 09:03:02 | HR-PC07 | 10.0.4.17 | priya | File renamed: Q3_budget.xlsx to Q3_budget.xlsx.locked","2026-11-18 09:03:03 | HR-PC07 | 10.0.4.17 | priya | README_DECRYPT.txt created in 214 folders"].join("\n")},
+{name:"Lateral movement and data exfiltration",mal:1,log:["2026-11-17 23:41:09 | FS02 | 10.0.2.8 | svc-backup | PsExec service installed on FS02","2026-11-17 23:52:30 | FS02 | 10.0.2.8 | svc-backup | 7z archive created: finance_2026.7z (1.2 GB)","2026-11-18 00:05:17 | FS02 | 10.0.2.8 | svc-backup | Outbound transfer 850 MB to 198.51.100.23 via scp"].join("\n")},
+{name:"Phishing payload with persistence",mal:1,log:["2026-11-18 11:20:05 | MKT-PC03 | 10.0.5.22 | arjun | Browser download from secure-update-portal.xyz: invoice_viewer.exe","2026-11-18 11:20:48 | MKT-PC03 | 10.0.5.22 | arjun | Process started: powershell -EncodedCommand JABjAGwAaQBlAG4AdAA","2026-11-18 11:21:30 | MKT-PC03 | 10.0.5.22 | arjun | schtasks /create /tn UpdaterSvc /tr C:\\Users\\arjun\\AppData\\up.exe"].join("\n")},
+{name:"Real-format SSH attack (Linux syslog)",mal:1,log:sy(6)+"\nNov 18 03:12:20 web01 sshd[812]: Accepted password for deploy from 198.51.100.77 port 52200 ssh2\nNov 18 03:15:02 web01 systemd[1]: auditd stopped"},
+{name:"Routine patching and a mistyped password (benign)",mal:0,log:["2026-11-18 03:00:02 | APP01 | 10.0.1.5 | ops | Accepted publickey for ops","2026-11-18 03:00:20 | APP01 | 10.0.1.5 | ops | sudo apt-get upgrade -y completed","2026-11-18 08:55:10 | APP01 | 10.0.1.9 | meena | Failed password for meena","2026-11-18 08:55:19 | APP01 | 10.0.1.9 | meena | Failed password for meena","2026-11-18 08:55:31 | APP01 | 10.0.1.9 | meena | Accepted password for meena"].join("\n")},
+{name:"Scheduled internal backup upload (benign, hard case)",mal:0,log:["2026-11-18 01:00:00 | BKP01 | 10.0.3.2 | svc-backup | Backup job started","2026-11-18 01:42:10 | BKP01 | 10.0.3.2 | svc-backup | Outbound upload 820 MB to backup.corp.internal completed","2026-11-18 01:42:15 | BKP01 | 10.0.3.2 | svc-backup | Backup job finished OK"].join("\n")}];
+
+function parse(t){return t.split("\n").map(s=>s.trim()).filter(Boolean).map((raw,i)=>{const p=raw.split("|").map(x=>x.trim());let ts="",host="-",ip="-",user="-",msg=raw;
+if(p.length>=5){ts=p[0];host=p[1];ip=p[2];user=p[3];msg=p.slice(4).join(" | ")}else if(/^[A-Z][a-z]{2}\s+\d+\s\d\d:\d\d:\d\d\s+\S+\s+.+$/.test(raw)){const y=raw.match(/^([A-Z][a-z]{2})\s+(\d+)\s(\d\d:\d\d:\d\d)\s+(\S+)\s+(.*)$/);ts="2026-"+String("JanFebMarAprMayJunJulAugSepOctNovDec".indexOf(y[1])/3+1).padStart(2,"0")+"-"+y[2].padStart(2,"0")+" "+y[3];host=y[4];msg=y[5];const q=msg.match(/from (\d{1,3}(?:\.\d{1,3}){3})/);ip=q?q[1]:"-";const u=msg.match(/(?:for (?:invalid user )?|user )([\w-]+)/i);user=u?u[1]:"-"}else{const m=raw.match(/^(\d{4}-\d\d-\d\d[ T]\d\d:\d\d:\d\d)/);ts=m?m[1]:"";const q=raw.match(/\d{1,3}(?:\.\d{1,3}){3}/);ip=q?q[0]:"-";msg=raw.replace(ts,"").trim()}
+return{i,ts,host,ip,user,msg,raw}}).sort((a,b)=>a.ts<b.ts?-1:a.ts>b.ts?1:a.i-b.i)}
+function analyse(text,I){const ev=parse(text);const hits=RULES.filter(r=>!CFG.off.includes(r.id)).map(r=>({r,ev:r.find(ev)})).filter(h=>h.ev.length).sort((a,b)=>b.r.pts-a.r.pts);
+const score=Math.min(100,hits.reduce((s,h)=>s+h.r.pts,0));const level=score>=85?"Critical":score>=60?"High":score>=25?"Suspicious":"Benign";
+const cat={};hits.forEach(h=>cat[h.r.cat]=(cat[h.r.cat]||0)+h.r.pts);const top=Object.entries(cat).sort((a,b)=>b[1]-a[1])[0];
+const L=Math.max(1,Math.ceil(score/20)),risk=L*I;return{ev,hits,score,level,type:top?top[0]:"No incident found",L,I,risk,rr:risk>=17?"Critical":risk>=10?"High":risk>=5?"Medium":"Low"}}
+
+const sha=async s=>{try{const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}catch(e){return"unavailable"}};
+let hist=[],chain=[],lastHash="";
+
+const save=()=>{try{localStorage.setItem("fiq_h_"+user,JSON.stringify(hist))}catch(e){}};
+async function addC(actor,action,detail){const prev=chain.length?chain[chain.length-1].hash:"GENESIS",time=new Date().toISOString().slice(0,19)+"Z";chain.push({n:chain.length+1,time,actor,action,detail,prev,hash:await sha([prev,time,actor,action,detail].join("|"))})}
+
+function makeReport(a,who){return `DIGITAL FORENSIC INCIDENT REPORT: ${a.id}
+Investigator: ${who}    Generated: ${new Date().toISOString().slice(0,19)}Z
+Evidence SHA-256: ${a.hash}
+Events analysed: ${a.ev.length}    Period: ${a.ev[0]?a.ev[0].ts:"-"} to ${a.ev.length?a.ev[a.ev.length-1].ts:"-"}
+
+Classification: ${a.type}
+Threat level: ${a.level} (score ${a.score}/100)
+Risk: likelihood ${a.L} x impact ${a.I} = ${a.risk}/25 (${a.rr})
+
+Indicators
+${a.hits.map(h=>`- [${sev(h.r.pts)}] ${TAC[h.r.id]}: ${h.r.name} | ${h.r.tech} | +${h.r.pts} | ${h.ev.length} line(s)`).join("\n")||"- none"}
+
+Recommended actions
+${a.hits.map((h,i)=>`${i+1}. ${h.r.fix}`).join("\n")||"1. No action needed; continue routine monitoring."}
+Preserve the original evidence and record every action in the chain of custody.`}
+
+function render(a){
+const first=h=>h.ev.reduce((m,e)=>e.ts<m?e.ts:m,h.ev[0].ts),tac={};
+a.hits.forEach(h=>{const t=TAC[h.r.id];if(t!=="Anomaly")(tac[t]=tac[t]||[]).push(h)});
+const story=a.hits.filter(h=>TAC[h.r.id]!=="Anomaly").sort((x,y)=>first(x)<first(y)?-1:first(x)>first(y)?1:0).map(h=>`<li><b>${esc(first(h))}</b> ${TAC[h.r.id]}: ${esc(h.r.name)} on ${esc(h.ev[0].host)} (${h.r.tech})</li>`).join("");
+const chips=ORDER.map(t=>`<span class="ch${tac[t]?" on":""}">${t}${tac[t]?" ✓":""}</span>`).join("");
+const band=r=>r>=17?"Critical":r>=10?"High":r>=5?"Medium":"Low";
+const hm=[5,4,3,2,1].map(i=>`<tr><th>${i}</th>${[1,2,3,4,5].map(l=>`<td class="${band(l*i)}">${l===a.L&&i===a.I?'<b style="color:var(--ink)">●</b>':""}</td>`).join("")}</tr>`).join("");
+const ioc={},addI=(t,v)=>{const k=t+"|"+v;ioc[k]=(ioc[k]||0)+1};
+a.ev.forEach(e=>{(e.raw.match(/\d{1,3}(?:\.\d{1,3}){3}/g)||[]).forEach(x=>{if(!PRIV.test(x))addI("External IP",x)});(e.raw.match(/[\w-]+(?:\.[\w-]+)*\.(?:xyz|com|net|org|ru|top|io)\b/gi)||[]).forEach(x=>addI("Domain",x));(e.raw.match(/[\w.-]+\.(?:exe|dll|ps1|7z|locked|encrypted)\b/gi)||[]).forEach(x=>addI("File",x))});
+const iocRows=Object.entries(ioc).map(([k,n])=>{const[t,v]=k.split("|"),bad=INTEL.includes(v);return`<tr><td>${t}</td><td>${esc(v)}</td><td>${n}</td><td class="${bad?"High":""}">${bad?"Known bad":"No match"}</td></tr>`}).join("");
+const acts=[],add=t=>{if(!acts.includes(t)&&acts.length<8)acts.push(t)};
+a.hits.forEach(h=>h.ev.forEach(e=>{const id=h.r.id;
+if(["R1","R2","R8","R9","A2"].includes(id))[e.ip,...(e.msg.match(/\d{1,3}(?:\.\d{1,3}){3}/g)||[])].filter(x=>x!=="-"&&!PRIV.test(x)).forEach(x=>add("Block "+x+" at the firewall"));
+if(["R2","R3"].includes(id)&&e.user!=="-")add("Disable account "+e.user+" and revoke its sessions");
+if(["R4","R7","R10"].includes(id)&&e.host!=="-")add("Isolate host "+e.host+" and capture a forensic image")}));
+const fl=new Set(a.hits.flatMap(h=>h.ev.map(e=>e.i))),tg={};a.hits.forEach(h=>h.ev.forEach(e=>(tg[e.i]=tg[e.i]||[]).push(h.r.id)));
+$("#out").innerHTML=`<div class="card"><h2>2. Verdict</h2><div class="sum"><div class="big ${a.level}">${a.score}</div><div><span class="tag ${a.level}">${a.level}</span> <b>${esc(a.type)}</b><div class="mut">${a.id}: ${a.ev.length} events parsed, ${a.hits.length} indicators triggered, SHA-256 ${a.hash.slice(0,16)}…</div></div></div>
+<p class="mut">Score = sum of points for triggered indicators, capped at 100. Benign below 25, Suspicious 25–59, High 60–84, Critical 85 and above. Each point traces to a row in the findings table.</p></div>
+<div class="card"><h2>3. Risk assessment</h2><p>Likelihood L = ⌈score ÷ 20⌉ = <b>${a.L}</b>, impact I (from asset) = <b>${a.I}</b>, risk = L × I = <b>${a.risk}</b> out of 25: <span class="tag ${a.rr}">${a.rr}</span></p><p class="mut">Rating bands: 1–4 Low, 5–9 Medium, 10–16 High, 17–25 Critical.</p><table class="hm">${hm}</table><p class="mut">Heat map: rows are impact (5 at the top), columns are likelihood from 1 to 5; the dot marks this incident.</p></div>
+<div class="card"><h2>4. Findings and recommended controls</h2><div class="tw"><table><tr><th>Indicator</th><th>Severity</th><th>ATT&amp;CK</th><th>Points</th><th>Evidence</th></tr>${a.hits.map(h=>`<tr><td>${esc(h.r.name)}</td><td class="${sev(h.r.pts)}">${sev(h.r.pts)}</td><td>${h.r.tech}</td><td>+${h.r.pts}</td><td>${h.ev.length} line(s): ${esc(h.ev[0].msg.slice(0,70))}</td></tr>`).join("")||"<tr><td colspan=5>No indicators triggered.</td></tr>"}</table></div>
+<ul>${a.hits.map(h=>`<li>${esc(h.r.fix)}</li>`).join("")||"<li>No action needed; continue routine monitoring.</li>"}</ul></div>
+<div class="card"><h2>5. Attack chain reconstruction</h2><p class="mut">Tactics observed, in kill-chain order (${Object.keys(tac).length} of ${ORDER.length}). Each step is timed from its earliest matching evidence.</p><div class="chain">${chips}</div><ol>${story||"<li>No attack stages reconstructed.</li>"}</ol></div>
+<div class="card"><h2>6. Indicators of compromise</h2><div class="tw"><table><tr><th>Type</th><th>Value</th><th>Seen</th><th>Threat intel</th></tr>${iocRows||"<tr><td colspan=4>No external indicators found.</td></tr>"}</table></div></div>
+<div class="card"><h2>7. Automated response playbook</h2><p class="mut">Proposed from the indicators. Approve each action; approvals are simulated and written to the chain of custody.</p><div class="tw"><table>${acts.map((t,i)=>`<tr><td>${esc(t)}</td><td id="ac${i}"><button class="btn" data-i="${i}">Approve</button></td></tr>`).join("")||"<tr><td>No response actions needed.</td></tr>"}</table></div></div>
+<div class="card"><h2>8. Reconstructed timeline</h2><p class="mut">Highlighted rows triggered at least one indicator.</p><div class="tw"><table><tr><th>Time</th><th>Host</th><th>User</th><th>Event</th><th>Rules</th></tr>${a.ev.slice(0,60).map(e=>`<tr class="${fl.has(e.i)?"f":""}"><td>${esc(e.ts)}</td><td>${esc(e.host)}</td><td>${esc(e.user)}</td><td>${esc(e.msg.slice(0,90))}</td><td>${(tg[e.i]||[]).join(" ")}</td></tr>`).join("")}</table></div></div>
+<div class="card"><h2>9. Chain of custody</h2><div class="tw"><table id="cu"><tr><th>#</th><th>Time (UTC)</th><th>Actor</th><th>Action</th><th>Entry hash</th></tr>${chain.map(c=>`<tr><td>${c.n}</td><td>${c.time}</td><td>${esc(c.actor)}</td><td>${esc(c.action)}: ${esc(c.detail)}</td><td>${c.hash.slice(0,12)}…</td></tr>`).join("")}</table></div><p class="mut">Each entry’s hash covers the previous entry’s hash, so editing any earlier entry breaks the chain.</p></div>
+<div class="card"><h2>10. Incident report</h2><pre id="rep">${esc(a.report)}</pre><button class="btn" id="cp">Copy report</button></div>`;
+document.querySelectorAll("[data-i]").forEach(b=>b.onclick=async()=>{await addC($("#who").value.trim()||"Analyst","Response approved (simulated)",acts[b.dataset.i]);const c=chain[chain.length-1];$("#cu").tBodies[0].insertAdjacentHTML("beforeend",`<tr><td>${c.n}</td><td>${c.time}</td><td>${esc(c.actor)}</td><td>${esc(c.action)}: ${esc(c.detail)}</td><td>${c.hash.slice(0,12)}…</td></tr>`);b.parentNode.innerHTML='<span class="Benign">Approved and logged</span>'});
+$("#cp").onclick=async()=>{try{await navigator.clipboard.writeText(a.report);$("#cp").textContent="Copied"}catch(e){const r=document.createRange();r.selectNodeContents($("#rep"));const s=getSelection();s.removeAllRanges();s.addRange(r);$("#cp").textContent="Selected: press Ctrl+C"}}}
+
+$("#go").onclick=async()=>{const text=$("#log").value.trim(),who=$("#who").value.trim()||"Analyst";
+if(!text){$("#vmsg").textContent="Add log evidence or choose a sample case first.";return}
+const h=await sha(text);if(h!==lastHash){await addC(who,"Evidence acquired",text.split("\n").length+" lines, SHA-256 "+h.slice(0,16)+"…");lastHash=h}
+const a=analyse(text,+$("#asset").value);a.hash=h;a.id="INC-"+String(hist.length+1).padStart(3,"0");
+await addC(who,"Automated analysis","score "+a.score+", "+a.level);a.report=makeReport(a,who);await addC(who,"Report generated",a.id);
+hist.push({id:a.id,time:new Date().toISOString().slice(0,19).replace("T"," "),type:a.type,score:a.score,level:a.level,rr:a.rr,tech:a.hits.map(x=>x.r.tech)});save();
+$("#vmsg").textContent="";lg(user,"Investigation "+a.id+" ("+a.level+")");render(a)};
+$("#ver").onclick=async()=>{if(!chain.length){$("#vmsg").textContent="Run an investigation first.";return}
+let ok=true,p="GENESIS";for(const c of chain){const h=await sha([p,c.time,c.actor,c.action,c.detail].join("|"));if(h!==c.hash||c.prev!==p)ok=false;p=c.hash}
+const same=(await sha($("#log").value.trim()))===lastHash;
+$("#vmsg").innerHTML=`Custody chain <b class="${ok?"Benign":"High"}">${ok?"intact":"broken"}</b>. Evidence <b class="${same?"Benign":"High"}">${same?"matches the acquired hash":"modified since acquisition"}</b>.`};
+$("#smp").innerHTML=SC.map((s,i)=>`<option value="${i}">${esc(s.name)}</option>`).join("");
+$("#smp").onchange=()=>{$("#log").value=SC[$("#smp").value].log};$("#smp").onchange();
+$("#file").onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{$("#log").value=r.result};r.readAsText(f)};
+
+$("#rt").onclick=()=>{let tp=0,fp=0,fn=0,tn=0;
+const rows=SC.map(s=>{const a=analyse(s.log,3),p=a.score>=25?1:0;if(s.mal&&p)tp++;else if(!s.mal&&p)fp++;else if(s.mal)fn++;else tn++;const ok=p===s.mal;
+return`<tr><td>${esc(s.name)}</td><td>${s.mal?"Incident":"Benign"}</td><td>${a.score}</td><td class="${a.level}">${a.level}</td><td class="${ok?"Benign":"High"}">${ok?"Correct":"Wrong"}</td></tr>`}).join("");
+const n=SC.length,pc=x=>(x*100).toFixed(0)+"%";
+$("#tout").innerHTML=`<div class="card"><div class="tw"><table><tr><th>Scenario</th><th>Expected</th><th>Score</th><th>Level</th><th>Result</th></tr>${rows}</table></div></div>
+<div class="card"><h2>Metrics</h2><p>Accuracy <b>${pc((tp+tn)/n)}</b>, precision <b>${pc(tp/(tp+fp||1))}</b>, recall <b>${pc(tp/(tp+fn||1))}</b></p><p class="mut">True positives ${tp}, false positives ${fp}, false negatives ${fn}, true negatives ${tn}. With only ${n} scripted scenarios these figures are indicative; see finding A-04.</p></div>`};
+
+function renderDash(){const n=hist.length,d=$("#dout");
+if(!n){d.innerHTML='<div class="card">No investigations yet. Run one on the Investigate tab and the dashboard will fill in.</div>';return}
+const bars=(arr,m)=>arr.map(([k,v])=>`<div class="row"><i>${esc(k)}</i><div><div class="bar" style="width:${v/m*100}%"></div></div><b>${v}</b></div>`).join("");
+const tc={};hist.forEach(h=>h.tech.forEach(t=>tc[t]=(tc[t]||0)+1));
+const tt=Object.entries(tc).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([t,v])=>{const r=RULES.find(x=>x.tech===t);return[t+" "+(r?r.name.slice(0,30):""),v]});
+d.innerHTML=`<div class="card"><h2>Overview</h2><p><b>${n}</b> investigations, average score <b>${(hist.reduce((s,h)=>s+h.score,0)/n).toFixed(1)}</b></p></div>
+<div class="g2"><div class="card"><h2>Threat level distribution</h2>${bars(["Benign","Suspicious","High","Critical"].map(l=>[l,hist.filter(h=>h.level===l).length]),n)}</div>
+<div class="card"><h2>Most triggered ATT&amp;CK techniques</h2>${bars(tt,Math.max(1,...tt.map(x=>x[1])))||"<p class=mut>None yet.</p>"}</div></div>
+<div class="card"><h2>Recent investigations</h2><div class="tw"><table><tr><th>ID</th><th>Time</th><th>Type</th><th>Score</th><th>Level</th><th>Risk</th></tr>${hist.slice(-10).reverse().map(h=>`<tr><td>${h.id}</td><td>${h.time}</td><td>${esc(h.type)}</td><td>${h.score}</td><td class="${h.level}">${h.level}</td><td class="${h.rr}">${h.rr}</td></tr>`).join("")}</table></div><p><button class="btn" id="clr">Clear history</button></p></div>`;
+$("#clr").onclick=()=>{hist=[];save();renderDash()}}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.toggle("on",x===b));document.querySelectorAll(".tab").forEach(t=>t.hidden=t.id!==b.dataset.t);if(b.dataset.t==="dash")renderDash();if(b.dataset.t==="adm")renderAdmin()});
+const hex=u=>[...u].map(x=>x.toString(16).padStart(2,"0")).join(""),unhex=s=>new Uint8Array(s.match(/../g).map(h=>parseInt(h,16)));
+async function kdf(p,salt){const k=await crypto.subtle.importKey("raw",new TextEncoder().encode(p),"PBKDF2",false,["deriveBits"]);return hex(new Uint8Array(await crypto.subtle.deriveBits({name:"PBKDF2",salt,iterations:100000,hash:"SHA-256"},k,256)))}
+let user="",mode="in";
+const users=()=>{try{return JSON.parse(localStorage.getItem("fiq_users"))||{}}catch(e){return{}}};
+const setUsers=u=>{try{localStorage.setItem("fiq_users",JSON.stringify(u))}catch(e){}};
+function setMode(m){mode=m;$("#tabin").classList.toggle("p",m==="in");$("#tabup").classList.toggle("p",m==="up");$("#pw2w").hidden=m==="in";$("#ab").textContent=m==="in"?"Sign in":"Create account";$("#am").textContent=""}
+$("#tabin").onclick=()=>setMode("in");$("#tabup").onclick=()=>setMode("up");
+function enter(u){{const U=users();if(U[u]&&!Object.values(U).some(x=>x.role==="admin")){U[u].role="admin";setUsers(U);lg(u,"Promoted to admin (no administrator existed)")}}user=u;try{sessionStorage.setItem("fiq_sess",u)}catch(e){}
+try{hist=JSON.parse(localStorage.getItem("fiq_h_"+u))||[]}catch(e){hist=[]}
+$("#auth").hidden=true;$("#app").hidden=false;$("#who").value=u;
+const adm=users()[u].role==="admin";$("#bar").innerHTML=`Signed in as <b>${esc(u)}</b> (${adm?"administrator":"analyst"}) <button class="btn" id="out">Sign out</button>`;
+$("#admb").hidden=!adm;$("#out").onclick=()=>{lg(u,"Signed out");signOut()};bump()}
+async function doAuth(){const n=$("#un").value.trim().toLowerCase(),p=$("#pw").value,m=$("#am");m.textContent="";
+if(!/^[a-z0-9_.-]{3,20}$/.test(n)){m.textContent="Username must be 3 to 20 characters: letters, numbers, dots, dashes or underscores.";return}
+if(p.length<8){m.textContent="Password must be at least 8 characters.";return}
+if(!(window.crypto&&crypto.subtle)){m.textContent="This browser cannot hash passwords here. Open the site over HTTPS.";return}
+const U=users();
+if(mode==="up"){if(p!==$("#pw2").value){m.textContent="The two passwords do not match.";return}
+if(U[n]){m.textContent="That username is taken. Sign in instead.";return}
+const s=crypto.getRandomValues(new Uint8Array(16));U[n]={s:hex(s),h:await kdf(p,s),role:Object.keys(U).length?"analyst":"admin"};setUsers(U);lg(n,"Account created ("+U[n].role+")");
+if(!users()[n]){m.textContent="Browser storage is blocked, so accounts cannot be saved here.";return}enter(n)}
+else{const r=U[n];
+if(r&&r.until>Date.now()){m.textContent="Too many failed attempts. Try again in a few minutes or ask an administrator.";return}
+if(r&&r.off){m.textContent="This account is disabled. Contact an administrator.";lg(n,"Blocked sign-in to disabled account");return}
+if(!r||(await kdf(p,unhex(r.s)))!==r.h){if(r){r.fails=(r.fails||0)+1;if(r.fails>=5){r.until=Date.now()+300000;r.fails=0;lg(n,"Account locked for 5 minutes")}setUsers(U)}lg(n,"Failed sign-in");m.textContent="Username or password is incorrect.";return}
+r.fails=0;setUsers(U);lg(n,"Signed in");enter(n)}}
+function lg(u,e){try{const L=JSON.parse(localStorage.getItem("fiq_log"))||[];L.push({t:new Date().toISOString().slice(0,19).replace("T"," "),u,e});localStorage.setItem("fiq_log",JSON.stringify(L.slice(-200)))}catch(x){}}
+function signOut(){try{sessionStorage.removeItem("fiq_sess")}catch(e){}location.reload()}
+let idle;function bump(){clearTimeout(idle);if(user)idle=setTimeout(()=>{lg(user,"Session timed out");signOut()},900000)}
+["click","keydown"].forEach(v=>addEventListener(v,bump));
+let CFG={off:[]};try{CFG=Object.assign({off:[]},JSON.parse(localStorage.getItem("fiq_cfg")))}catch(e){}
+if(CFG.intel)INTEL.splice(0,INTEL.length,...CFG.intel);
+const saveCfg=()=>{try{localStorage.setItem("fiq_cfg",JSON.stringify(CFG))}catch(e){}};
+function renderAdmin(){const U=users(),me=user;
+if((U[me]||{}).role!=="admin"){$("#aout").innerHTML='<div class="card">Administrators only.</div>';return}
+const names=Object.keys(U).sort(),H=n=>{try{return JSON.parse(localStorage.getItem("fiq_h_"+n))||[]}catch(e){return[]}};
+let L=[];try{L=JSON.parse(localStorage.getItem("fiq_log"))||[]}catch(e){}
+const rows=names.map(n=>{const r=U[n],self=n===me,lk=r.until>Date.now(),b=(a,t)=>`<button class="btn" data-a="${a}" data-n="${esc(n)}">${t}</button> `;
+return`<tr><td>${esc(n)}${self?" (you)":""}</td><td>${r.role||"analyst"}</td><td class="${r.off||lk?"High":"Benign"}">${r.off?"Disabled":lk?"Locked":"Active"}</td><td>${H(n).length}</td><td>${self?"":b("role",r.role==="admin"?"Make analyst":"Make admin")+(lk?b("unlock","Unlock"):b("off",r.off?"Enable":"Disable"))+b("pw","Reset password")+b("del","Delete")}</td></tr>`}).join("");
+const all=names.flatMap(n=>H(n).map(h=>({...h,n}))).sort((x,y)=>x.time<y.time?1:-1).slice(0,12);
+$("#aout").innerHTML=`<div class="card"><h2>User management</h2><div class="tw"><table><tr><th>User</th><th>Role</th><th>Status</th><th>Scans</th><th>Actions</th></tr>${rows}</table></div><p class="mut">${names.length} account(s). You cannot change your own role or status, so an administrator always remains. Five failed sign-ins lock an account for five minutes; sessions end after 15 minutes of inactivity.</p><p id="amsg" class="mut"></p></div>
+<div class="card"><h2>Detection rules</h2><div class="tw"><table><tr><th>On</th><th>ID</th><th>Rule</th><th>ATT&amp;CK</th><th>Points</th></tr>${RULES.map(r=>`<tr><td><input type="checkbox" style="width:auto" data-r="${r.id}" ${CFG.off.includes(r.id)?"":"checked"}></td><td>${r.id}</td><td>${esc(r.name)}</td><td>${r.tech}</td><td>+${r.pts}</td></tr>`).join("")}</table></div></div>
+<div class="card"><h2>Threat-intelligence list</h2><p class="mut">One IP address or domain per line.</p><textarea id="intel" style="height:90px">${esc(INTEL.join("\n"))}</textarea><p><button class="btn p" id="isv">Save list</button></p></div>
+<div class="card"><h2>All investigations</h2><div class="tw"><table><tr><th>User</th><th>ID</th><th>Time</th><th>Type</th><th>Score</th><th>Level</th></tr>${all.map(h=>`<tr><td>${esc(h.n)}</td><td>${h.id}</td><td>${h.time}</td><td>${esc(h.type)}</td><td>${h.score}</td><td class="${h.level}">${h.level}</td></tr>`).join("")||"<tr><td colspan=6>No investigations yet.</td></tr>"}</table></div></div>
+<div class="card"><h2>Activity log</h2><div class="tw"><table><tr><th>Time (UTC)</th><th>User</th><th>Event</th></tr>${L.slice(-25).reverse().map(l=>`<tr><td>${l.t}</td><td>${esc(l.u)}</td><td>${esc(l.e)}</td></tr>`).join("")||"<tr><td colspan=3>No activity yet.</td></tr>"}</table></div><p><button class="btn" id="lgc">Clear log</button></p></div>`;
+document.querySelectorAll("[data-a]").forEach(b=>b.onclick=async()=>{const U2=users(),n=b.dataset.n,r=U2[n],a=b.dataset.a;if(!r)return;
+if(a==="role"){r.role=r.role==="admin"?"analyst":"admin";lg(me,"Set role of "+n+" to "+r.role)}
+else if(a==="off"){r.off=!r.off;lg(me,(r.off?"Disabled ":"Enabled ")+n)}
+else if(a==="unlock"){r.until=0;r.fails=0;lg(me,"Unlocked "+n)}
+else if(a==="del"){if(b.textContent!=="Confirm delete"){b.textContent="Confirm delete";return}delete U2[n];try{localStorage.removeItem("fiq_h_"+n)}catch(e){}lg(me,"Deleted "+n)}
+else if(a==="pw"){const t=hex(crypto.getRandomValues(new Uint8Array(5))),s=crypto.getRandomValues(new Uint8Array(16));r.s=hex(s);r.h=await kdf(t,s);r.fails=0;r.until=0;setUsers(U2);lg(me,"Reset password of "+n);renderAdmin();$("#amsg").innerHTML=`Temporary password for <b>${esc(n)}</b>: <b>${t}</b>. Share it once; it is not shown again.`;return}
+setUsers(U2);renderAdmin()});
+document.querySelectorAll("[data-r]").forEach(c=>c.onchange=()=>{CFG.off=CFG.off.filter(x=>x!==c.dataset.r);if(!c.checked)CFG.off.push(c.dataset.r);saveCfg();lg(me,(c.checked?"Enabled":"Disabled")+" rule "+c.dataset.r)});
+$("#isv").onclick=()=>{CFG.intel=$("#intel").value.split("\n").map(s=>s.trim()).filter(Boolean);INTEL.splice(0,INTEL.length,...CFG.intel);saveCfg();lg(me,"Updated threat-intel list ("+CFG.intel.length+" entries)");$("#isv").textContent="Saved"};
+$("#lgc").onclick=()=>{try{localStorage.removeItem("fiq_log")}catch(e){}lg(me,"Cleared activity log");renderAdmin()}}
+$("#ab").onclick=doAuth;["un","pw","pw2"].forEach(i=>$("#"+i).onkeydown=e=>{if(e.key==="Enter")doAuth()});
+try{const s=sessionStorage.getItem("fiq_sess");if(s&&users()[s]&&!users()[s].off)enter(s)}catch(e){}
+</script></body></html>
